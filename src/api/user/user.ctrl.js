@@ -1,45 +1,34 @@
 const User = require('../../models/user');
 const Course = require('../../models/course');
 
-exports.reserved = async (ctx) => {
+exports.list = async (ctx) => {
+  const { _id } = ctx.state.user;
+
   try {
-    const user = await User.findById(ctx.state.user._id);
-    ctx.body = user.reserved;
+    const user = await User.findById(_id);
+    ctx.body = user.courseList;
   } catch (e) {
     e.throw(500, e);
   }
 };
 
-exports.confirmed = async (ctx) => {
-  try {
-    const user = await User.findById(ctx.state.user._id);
-    ctx.body = user.confirmed;
-  } catch (e) {
-    e.throw(500, e);
-  }
-};
-
-exports.add = async (ctx) => {
+exports.register = async (ctx) => {
   let check = false;
-  const { no } = ctx.request.body;
+  const { course_id } = ctx.request.body;
+  const { _id } = ctx.state.user;
 
   try {
-    const course = await Course.findByNo(no);
+    const course = await Course.findByCourseid(course_id);
 
     if (!course) {
       ctx.status = 404;
       return;
     }
 
-    const user = await User.findById(ctx.state.user._id);
+    const user = await User.findById(_id);
 
-    if (!user) {
-      ctx.status = 401;
-      return;
-    }
-
-    await user.confirmed.forEach((el) => {
-      if (el.no === no) {
+    await user.courseList.forEach((el) => {
+      if (el.courseNum === course_id) {
         check = true;
         return;
       }
@@ -50,9 +39,9 @@ exports.add = async (ctx) => {
       return;
     }
 
-    const newConfirmed = [...user.confirmed].concat(course);
+    const newList = [...user.courseList].concat(course);
 
-    user.confirmed = newConfirmed;
+    user.courseList = newList;
 
     await user.save();
     ctx.body = user.serialize();
@@ -62,26 +51,22 @@ exports.add = async (ctx) => {
 };
 
 exports.remove = async (ctx) => {
-  const { no } = ctx.request.body;
+  const { cid } = ctx.params;
+  const { _id } = ctx.state.user;
 
   try {
-    const course = await Course.findByNo(no);
+    const course = await Course.findByCourseid(cid);
 
     if (!course) {
       ctx.status = 404;
       return;
     }
 
-    const user = await User.findById(ctx.state.user._id);
+    const user = await User.findById(_id);
 
-    if (!user) {
-      ctx.status = 401;
-      return;
-    }
+    const newList = user.courseList.filter((el) => el.courseNum !== cid);
 
-    const newConfirmed = user.confirmed.filter((el) => el.no !== no);
-
-    user.confirmed = newConfirmed;
+    user.courseList = newList;
     await user.save();
     ctx.body = user.serialize();
   } catch (e) {

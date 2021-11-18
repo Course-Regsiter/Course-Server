@@ -1,12 +1,10 @@
 const Router = require('koa-router');
-const { reserved, confirmed, add, remove } = require('./user.ctrl');
+const { isLoggedIn } = require('../../middleware/isLogged');
+const { list, register, remove } = require('./user.ctrl');
 
 const user = new Router();
 
-// 예비 리스트
-user.get('/reserved', reserved);
-// 확정 리스트
-user.get('/confirmed', confirmed);
-user.post('/confirmed', add);
-user.delete('/confirmed', remove);
+user.get('/course', isLoggedIn, list);
+user.post('/course', isLoggedIn, register);
+user.delete('/course/:cid', isLoggedIn, remove);
 module.exports = user;

@@ -1,11 +1,11 @@
 const Course = require('../../models/course');
 
 exports.write = async (ctx) => {
-  const { no, name, prof, room } = ctx.request.body;
+  const { courseNum, courseName, prof, room } = ctx.request.body;
 
   const course = new Course({
-    no,
-    name,
+    courseNum,
+    courseName,
     prof,
     room,
   });
@@ -22,6 +22,16 @@ exports.list = async (ctx) => {
   try {
     const courses = await Course.find().exec();
     ctx.body = courses;
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
+exports.read = async (ctx) => {
+  const { cid } = ctx.params;
+  try {
+    const course = await Course.findOne({ courseNum: cid }).exec();
+    ctx.body = course;
   } catch (e) {
     ctx.throw(500, e);
   }

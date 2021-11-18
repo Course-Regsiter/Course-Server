@@ -1,11 +1,10 @@
+// user 데이터베이스 -> 리스트 한개로 축소
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 
 const CourseSchema = new Schema({
-  no: String,
-  name: String,
+  courseNum: String,
+  courseName: String,
   prof: String,
   room: String,
 });
@@ -13,36 +12,14 @@ const CourseSchema = new Schema({
 const UserSchema = new Schema({
   id: String,
   password: String,
-  reserved: [CourseSchema],
-  confirmed: [CourseSchema],
+  courseList: [CourseSchema],
 });
 
 // 인스턴스 메서드
-UserSchema.methods.setHashPassword = async function (password) {
-  const hash = await bcrypt.hash(password, 10);
-  this.password = hash;
-};
-UserSchema.methods.checkPassword = async function (password) {
-  const result = await bcrypt.compare(password, this.password);
-  return result;
-};
 UserSchema.methods.serialize = function () {
   const data = this.toJSON();
   delete data.password;
   return data;
-};
-UserSchema.methods.generateToken = function () {
-  const token = jwt.sign(
-    {
-      _id: this._id,
-      userid: this.id,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: '7d',
-    },
-  );
-  return token;
 };
 
 // 스태틱 메서드

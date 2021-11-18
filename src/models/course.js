@@ -3,14 +3,14 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const CourseSchema = new Schema({
-  no: String,
-  name: String,
+  courseNum: String,
+  courseName: String,
   prof: String,
   room: String,
 });
 
-CourseSchema.statics.findByNo = function (no) {
-  return this.findOne({ no });
+CourseSchema.statics.findByCourseid = function (course_id) {
+  return this.findOne({ courseNum: course_id });
 };
 
 const Course = mongoose.model('Course', CourseSchema);
