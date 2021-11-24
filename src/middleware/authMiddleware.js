@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = async (ctx, next) => {
-  const token = ctx.cookies.get('access_token');
+  //const token = ctx.cookies.get('access_token');
+  const token = ctx.get('Authorization')?.split('Bearer ')[1];
 
   if (!token) return next(); // 토큰 없음
 

@@ -43,6 +43,7 @@ exports.register = async (ctx) => {
 
     if (!course) {
       ctx.status = 409;
+      ctx.body = "해당 과목이 없습니다.";
       return;
     }
 
@@ -69,6 +70,7 @@ exports.register = async (ctx) => {
 
       if (check) {
         ctx.status = 409;
+        ctx.body = "이미 신청한 과목입니다.";
         return;
       }
 
@@ -94,6 +96,7 @@ exports.select = async (ctx) => {
 
     if (!course) {
       ctx.status = 409;
+      ctx.body = "해당 과목이 없습니다.";
       return;
     }
 
@@ -120,6 +123,7 @@ exports.select = async (ctx) => {
 
       if (check) {
         ctx.status = 409;
+        ctx.body = "이미 신청한 과목입니다.";
         return;
       }
 
@@ -158,3 +162,28 @@ exports.remove = async (ctx) => {
     ctx.throw(500, e);
   }
 };
+
+exports.preRemove = async (ctx) => {
+  const { cid } = ctx.params;
+  const { userid } = ctx.state.user;
+
+  try {
+    const course = await Course.findByCourseid(cid);
+
+    if (!course) {
+      ctx.status = 409;
+      return;
+    }
+
+    const list = await List.findByUserid(userid);
+
+    const newList = list.preCourseList.filter((el) => el.courseNum !== cid);
+
+    list.preCourseList = newList;
+    await list.save();
+    ctx.body = list;
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
